@@ -1,0 +1,273 @@
+# Test Plan – Sync Verification (Connector ↔ Jira/Xray)
+
+## Objective
+
+The main goal of this test plan is to verify that the connector correctly synchronizes data between the source testing tool and Jira/Xray. This includes validating that test cases and test execution results are transferred accurately, along with all related metadata, statuses, and relationships.
+
+I want to ensure that after every sync cycle:
+- Test cases are created or updated correctly in Jira
+- Test executions are properly reflected in Xray
+- All field mappings are accurate
+- Relationships between objects remain intact
+- Any failures during sync are handled properly and are visible for debugging
+
+## Scope
+
+### In Scope
+- Creation and update of Jira Test issues
+- Synchronization of test executions to Xray
+- Validation of field mappings (summary, description, labels, etc.)
+- Status/result synchronization (Pass/Fail/Blocked)
+- Relationship checks between test cases and executions
+- Error handling and logging behavior
+
+### Out of Scope
+- Performance or load testing of the connector
+- UI behavior unrelated to synchronization
+- Authorization changes unless directly affecting sync
+
+## Assumptions
+- The connector sync cycle has completed successfully unless testing a failure case
+- Field mappings between source system and Jira/Xray are already configured
+- Access to Jira/Xray and logs is available
+- Test data exists in the source system
+
+## Entry Criteria
+- Connector is deployed and accessible
+- Valid credentials are configured
+- Source system contains test cases and execution data
+- Mapping configuration is active
+
+## Exit Criteria
+- All test scenarios are executed
+- Data consistency is verified
+- Any defects are logged with proper details
+- Critical sync functionality is validated
+
+# Part A – Positive Scenarios
+
+## Scenario 1: Test Case Sync Verification
+
+### Objective
+To verify that test cases from the source system are correctly created or updated in Jira as Test issues.
+
+### Preconditions
+- Test case exists in source system
+- Mapping is configured
+- Sync has completed
+
+### What I Check
+- Jira issue is created with type “Test”
+- Summary matches source test case name
+- Description matches source
+- Fields like labels, priority, components are correctly mapped
+- External reference or ID is maintained
+- No duplicate issue is created
+
+### Where I Check
+- Jira issue screen
+- Xray fields
+- API response (if available)
+- Connector logs
+
+### What “Correct” Means
+- Exactly one Jira Test issue exists for each source test case
+- All mapped fields match the source system accurately
+- Mandatory fields are populated
+- External reference correctly links to the source
+- No data loss, corruption, or incorrect mapping
+
+### Expected Result
+- Data is accurately reflected in Jira
+- No duplicates or inconsistencies
+
+### Test Steps
+1. Identify a test case in the source tool
+2. Capture its details (name, description, etc.)
+3. Run or wait for sync
+4. Search for the issue in Jira
+5. Verify issue type and fields
+6. Confirm no duplicates exist
+7. Record results
+
+## Scenario 2: Test Execution Sync Verification
+
+### Objective
+To verify that test execution results are correctly synced to Xray.
+
+### Preconditions
+- Execution exists in source system
+- Test case already synced
+
+### What I Check
+- Test run is created in Xray
+- It is linked to correct test case
+- Status matches (Pass/Fail/etc.)
+- Metadata like timestamp, user, environment is correct
+- No incorrect linking
+
+### Where I Check
+- Xray Test Run
+- Jira issue
+- API response/logs
+
+### What “Correct” Means
+- Test run exists and is linked to the correct test case
+- Execution status matches exactly with source
+- Metadata is preserved correctly
+- No orphan or incorrectly linked executions
+
+### Expected Result
+- Execution data is accurate and properly linked
+
+### Test Steps
+1. Select executed test case in source
+2. Capture execution details
+3. Run sync
+4. Check Xray test run
+5. Verify status and linkage
+6. Compare metadata
+7. Record results
+
+## Scenario 3: Update & Relationship Consistency
+
+### Objective
+To verify that updates do not create duplicates and relationships remain intact.
+
+### Preconditions
+- Test case already synced
+- Update is made in source system
+
+### What I Check
+- Existing Jira issue is updated
+- Relationships remain intact
+- Updated values are reflected correctly
+- No duplicate records created
+
+### What “Correct” Means
+- Same Jira issue is reused (not recreated)
+- Relationships between test cases and executions remain intact
+- Updates are applied correctly
+- No duplicate issues or executions
+
+### Expected Result
+- Data remains consistent across updates
+
+### Test Steps
+1. Modify test case in source
+2. Run sync
+3. Verify same Jira issue updated
+4. Check relationships
+5. Ensure no duplicates
+6. Record results
+
+# Part B – Negative Scenario
+
+## Scenario: Sync Failure Handling
+
+### Objective
+To verify that errors during sync are handled properly.
+
+### Preconditions
+- Introduce error (missing mapping, invalid field, API failure)
+
+### Expected Behavior
+- Sync fails gracefully
+- Error is logged clearly
+- No partial or incorrect data created
+
+### What “Correct” Means
+- No incorrect or partially created records exist in Jira/Xray
+- Errors are clearly logged with meaningful details
+- Failed records are traceable
+- Valid records are not affected
+
+### What I Verify
+- No corrupted Jira/Xray records
+- Logs contain:
+  - source ID
+  - error message
+  - timestamp
+- Valid data is not affected
+
+### Test Steps
+1. Introduce invalid mapping
+2. Trigger sync
+3. Check logs
+4. Verify no incorrect data created
+5. Ensure system stability
+
+# Part C – Manual vs Automated Testing
+
+## What I Would Automate
+- API validation for field mappings
+- Status and result verification
+- Relationship checks
+- Regression scenarios
+- Negative API tests
+
+### Reason
+- Fast and repeatable
+- High accuracy
+- Suitable for structured data
+
+## What I Would Do Manually
+- UI validation in Jira/Xray
+- Exploratory testing
+- New mapping validation
+- Visual checks (attachments, comments)
+
+### Reason
+- Requires human validation
+- Not always stable for automation
+
+## Summary
+Automate:
+- Repetitive API checks
+- Field validation
+- Relationships
+
+Manual:
+- UI checks
+- Exploratory testing
+- Complex validation
+
+# Part D – Data Consistency Verification
+
+If I have access to both systems, I would compare:
+
+### Test Cases
+- Source name ↔ Jira summary
+- Description ↔ Jira description
+- Labels ↔ Jira labels
+- ID ↔ external reference
+
+### Executions
+- Result ↔ Xray status
+- Timestamp
+- Environment
+- Linked test case
+
+### Approach
+- Use unique ID for comparison
+- Validate one-to-one mapping
+- Use APIs for automated comparison
+
+# Risks
+- Field mapping differences
+- Workflow restrictions
+- Async timing issues
+- UI vs API mismatch
+
+# Recommended Approach
+I would use Robot Framework for API testing to:
+- Validate field mappings
+- Verify relationships
+- Run regression tests
+- Check negative scenarios
+
+# Conclusion
+
+Overall, I would ensure that synchronization is accurate, consistent, and reliable. The key focus is not just checking if data exists, but verifying correctness, relationships, updates, and error handling.
+
+Automation would cover API-level validations, while manual testing would focus on UI and exploratory scenarios, giving complete coverage of the integration.
