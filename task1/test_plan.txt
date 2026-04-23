@@ -2,7 +2,7 @@ Task 1 — Sync Verification & Test Plan
 Context
 The connector synchronizes data between a testing tool and Jira/Xray through REST APIs. The synchronization includes:
 •	Test cases from the source testing tool to Jira issues of type Test 
-•	Test execution results to Xray test runs 
+•	Test execution results to Xray test runs
 •	Related metadata, statuses, and mappings between the two systems 
 The goal of this test plan is to verify that the sync produced correct and consistent results, that failures are handled correctly, and that the right parts of the process are automated versus manually verified.
 
